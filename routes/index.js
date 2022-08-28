@@ -1,9 +1,14 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
+const { utilities } = require('../utils');
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+
+router.use('/api/v1/users', require('./user'));
+router.use('/api/v1/auth', require('./auth'));
+
+// 404 handling
+router.use('/', (req, res) => {
+  utilities.handleApiResponse(404, res);
 });
 
 module.exports = router;
