@@ -1,8 +1,8 @@
 const { Server } = require('socket.io');
 
-const sockets = module.exports;
+const Sockets = module.exports;
 
-sockets.init = function (server) {
+Sockets.init = function (server) {
 
     let socketIO = new Server({
 		path: '/socket.io',
@@ -21,8 +21,27 @@ sockets.init = function (server) {
     socketIO.on('connection', onConnection);
     
     socketIO.listen(server, sockOptions);
+    Sockets.io = socketIO;
 }
 
 function onConnection (socket) {
-    console.log(socket)
+
+    socket.on('join-room', (sock) => {
+        let {room} = sock;
+        socket.join(room);
+        console.log(room)
+    })
+
+    socket.on('leave-room', (sock) => {
+        let {room} = sock;
+        socket.leave(room);
+        console.log(room)
+    })
+
+    socket.on('message:send', sock => {
+        console.log(sock);
+        Sockets.io.in(sock.room).emit('message:receive', sock);
+    });
+
+    // socket.emit('message:receive', {sock})
 }
