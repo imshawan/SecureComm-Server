@@ -156,7 +156,7 @@ userAuth.resetPassword = (req, res) => {
 userAuth.changePassword = (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
-  User.findById(req.user._id), (err, user) => {
+  User.findById(req.user._id, (err, user) => {
     if (err) {
       return utilities.handleApiResponse(400, res, new Error(err));
     } else {
@@ -176,5 +176,5 @@ userAuth.changePassword = (req, res) => {
          });
       }
     }
-  };
+  });
 }
