@@ -10,5 +10,7 @@ router.post('/otp', validation.checkRequiredFields.bind(null, ['email']), contro
 router.post('/register', validation.checkRequiredFields.bind(null, ['email', 'otp', 'username', 'password']), controllers.auth.registerUser);
 router.post('/signin', validation.checkRequiredFields.bind(null, ['email', 'password']), passport.authenticate('local'), controllers.auth.signIn);
 
+router.post('/password/forgot', validation.checkRequiredFields.bind(null, ['email']), controllers.auth.forgotPassword);
+
 
 module.exports = router;

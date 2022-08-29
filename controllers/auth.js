@@ -91,7 +91,10 @@ userAuth.sendOTP = (req, res, next) => {
         if (err) {
           return utilities.handleApiResponse(400, res, new Error(err));
         } else {
-          payload.user = user;
+          payload.user = user && user._doc ? user._doc : {};
+          if (payload.user.payload) {
+            delete payload.user.payload;
+          }
           utilities.handleApiResponse(200, res, payload);
         }
       });
@@ -99,3 +102,24 @@ userAuth.sendOTP = (req, res, next) => {
       utilities.handleApiResponse(400, res, {message: "Something went wrong!"});
     }
   }
+
+  userAuth.forgotPassword = (req, res) => {
+    let token = utilities.generateOtp(6);
+  
+    User.findOne({ email: req.body.email }, (err, user) => {
+      if (!user) {
+        return utilities.handleApiResponse(404, res, new Error('Account with that email address doesn\'t exists'));
+      }
+      var payload = {}
+      payload.passwordToken = token
+      payload.expiresIn = Date.now() + 300000; // 5 min
+
+      User.findByIdAndUpdate(user._id, { $set: {payload} }, { new: true })
+      .then(() => {
+        return utilities.handleApiResponse(200, res, {message: 'An e-mail with OTP has been sent to ' + user.email + ' with further instructions.'});
+      })
+      .catch(() => {
+        return utilities.handleApiResponse(500, res, new Error('Some error occured!'));
+      })
+  })
+}

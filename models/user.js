@@ -23,7 +23,11 @@ const User = new Schema({
     acceptedTerms: {
         type: Boolean,
         default: false
-    }
+    },
+    payload: {
+        type: Object,
+        default: {}
+    },
 }, {
     timestamps: true
 });
