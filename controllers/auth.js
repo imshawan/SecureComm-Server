@@ -1,6 +1,7 @@
 const passport = require('passport');
 const { utilities } = require('../utils');
 const { User, OTP } = require('../models');
+const { authentication } = require('../middlewares');
 
 const config = require('../app.config');
 
@@ -78,4 +79,23 @@ userAuth.sendOTP = (req, res, next) => {
       }
     })
   
+  }
+
+  userAuth.signIn = (req, res, next) => {
+    const token = authentication.getToken({_id: req.user._id}, req.body.remember_me);
+    if (token) {
+      const payload = {
+        token, message: 'You have successfully logged in!'
+      };
+      User.findById({_id: req.user._id}, (err, user) => {
+        if (err) {
+          return utilities.handleApiResponse(400, res, new Error(err));
+        } else {
+          payload.user = user;
+          utilities.handleApiResponse(200, res, payload);
+        }
+      });
+    } else {
+      utilities.handleApiResponse(400, res, {message: "Something went wrong!"});
+    }
   }
