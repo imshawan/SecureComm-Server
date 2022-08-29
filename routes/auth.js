@@ -12,6 +12,7 @@ router.post('/signin', validation.checkRequiredFields.bind(null, ['username', 'p
 
 router.post('/password/forgot', validation.checkRequiredFields.bind(null, ['email']), controllers.auth.forgotPassword);
 router.post('/password/reset', validation.checkRequiredFields.bind(null, ['email', 'otp', 'password']), controllers.auth.resetPassword);
+router.post('/password/change', validation.checkRequiredFields.bind(null, ['oldPassword', 'newPassword']), passport.authenticate('local'), controllers.auth.changePassword);
 
 
 module.exports = router;

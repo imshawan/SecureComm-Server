@@ -124,7 +124,7 @@ userAuth.sendOTP = (req, res, next) => {
   })
 }
 
-userAuth.resetPassword = (req, res, next) => {
+userAuth.resetPassword = (req, res) => {
   const { otp, email, password } = req.body;
 
   User.findOne({ 'payload.passwordToken': otp }, function(err, UserFound) {
@@ -151,4 +151,30 @@ userAuth.resetPassword = (req, res, next) => {
       }
     }
   });
+}
+
+userAuth.changePassword = (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  User.findById(req.user._id), (err, user) => {
+    if (err) {
+      return utilities.handleApiResponse(400, res, new Error(err));
+    } else {
+      if (!user) {
+        return utilities.handleApiResponse(400, res, new Error('User not found'));
+      } else {
+        user.changePassword(oldPassword, newPassword, function(err) {
+           if(err) {
+            if(err.name === 'IncorrectPasswordError'){
+              return utilities.handleApiResponse(400, res, new Error('Incorrect password'));
+            } else {
+              return utilities.handleApiResponse(400, res, new Error('Something went wrong!! Please try again after sometime'));
+            }
+          } else {
+            return utilities.handleApiResponse(200, res, {message: 'Your password has been changed successfully' });
+           }
+         });
+      }
+    }
+  };
 }
