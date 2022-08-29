@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { utilities } = require('../utils');
+
+const controllers = require('../controllers');
+const { validation } = require('../middlewares');
 
 
-router.get('/', function(req, res, next) {
-  utilities.handleApiResponse(200, res)
-});
+router.post('/otp', validation.checkRequiredFields.bind(null, ['email']), controllers.auth.sendOTP);
+router.post('/register', validation.checkRequiredFields.bind(null, ['email', 'otp', 'username', 'password']), controllers.auth.registerUser);
+
 
 module.exports = router;

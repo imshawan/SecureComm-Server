@@ -14,7 +14,7 @@ utilities.handleApiResponse = function (code, response, data) {
 		payload.status = {
 			success: true,
 			error,
-			message,
+			message: 'Ok',
 		};
 		payload.payload = data || {};
 
@@ -28,7 +28,7 @@ utilities.handleApiResponse = function (code, response, data) {
 			message,
 		};
 	} else {
-		message = statusCodeWithMessage[code] || null;
+		message = (data ? data.message : statusCodeWithMessage[code]) || null;
 		error = statusCodeWithError[code];
 
 		payload.status = {
@@ -38,5 +38,24 @@ utilities.handleApiResponse = function (code, response, data) {
 		};
 		payload.payload = data || {};
 	}
+	response.setHeader('Content-Type', 'application/json');
 	response.status(code).json(payload);
 }
+
+utilities.generateOtp = (length) => {
+	if (typeof length != 'number'){
+	  throw new Error(`Length must be a number, not ${typeof length}`);
+	}
+	const digits = '0123456789';
+	const alpha = 'abcdefghijklmnopqrstuvwxyz';
+	const alphaLength = Math.floor(length/3);
+	return randomize(alphaLength, alpha).toUpperCase() + randomize(length - alphaLength, digits);
+  }
+  
+const randomize = (length, payload) => {
+	let OTP = '';
+	for (let i = 0; i < length; i++ ) {
+		  OTP += payload[Math.floor(Math.random() * 10)];
+	  }
+	return OTP;
+  }

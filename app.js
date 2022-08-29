@@ -3,8 +3,16 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const mongoose = require('mongoose');
 
 const indexRouter = require('./routes/index');
+const config = require('./app.config');
+
+const connect = mongoose.connect(config.mongoUrl, {user: config.mongoUser, pass: String(config.mongoPass)})
+connect.then((db) => {
+  console.info("Established connection with the database!");
+}, (err) => {console.log(err)});
+
 
 const app = express();
 
