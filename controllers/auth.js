@@ -123,3 +123,32 @@ userAuth.sendOTP = (req, res, next) => {
       })
   })
 }
+
+userAuth.resetPassword = (req, res, next) => {
+  const { otp, email, password } = req.body;
+
+  User.findOne({ 'payload.passwordToken': otp }, function(err, UserFound) {
+    if (!UserFound) {
+      return utilities.handleApiResponse(403, res, new Error('Invalid OTP'));
+    } else {
+      let currentTime = Date.now();
+      let document = UserFound._doc || {};
+      let { payload={} } = document;
+
+      if (email != document.email) {
+        return utilities.handleApiResponse(403, res, new Error('Reset email and the OTP doesn\'t match'));
+      }
+
+      UserFound.payload = {};
+      if (parseInt(currentTime) <= parseInt(payload.expiresIn)) {
+        UserFound.setPassword(password, () => {
+          UserFound.save();
+          return utilities.handleApiResponse(200, res, {message: 'The password reset was successful'});
+        });
+      } else {
+        UserFound.save();
+        return utilities.handleApiResponse(403, res, new Error('This OTP has expired'));
+      }
+    }
+  });
+}
