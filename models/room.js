@@ -25,7 +25,7 @@ const roomSchema = new Schema({
     },
     lastActive: {
         type: Date,
-        default: new Date.getUTCDate()
+        default: new Date(Date.now()).toISOString()
     },
 },{
     timestamps: true
