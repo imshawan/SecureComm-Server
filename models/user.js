@@ -6,7 +6,7 @@ const Schema = mongoose.Schema;
 const User = new Schema({
     firstname: {
         type: String,
-        default: 'Default',
+        default: 'SecureComm',
     },
     lastname: {
         type: String,
@@ -26,7 +26,7 @@ const User = new Schema({
     },
     about: {
         type: String,
-        default: 'SecureComm user'
+        default: 'Hey there! SecureComm is really interesting.'
     },
     acceptedTerms: {
         type: Boolean,

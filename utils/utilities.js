@@ -59,3 +59,30 @@ const randomize = (length, payload) => {
 	  }
 	return OTP;
   }
+
+utilities.paginateResponse = (data, count, limit, page) => {
+	page = parseInt(page)
+
+	const last = count ? Math.floor(count / limit) : 0;
+	const firstPageNumber = 0
+	const nextPageNumber = page === last ? null : (page + 1);
+	const prevPageNumber = page === 0 ? null : (page - 1);
+	const lastPageNumber = Math.floor(count / limit);
+
+	const pagination = {
+		total: count,
+		perPage: limit,
+		currentPage: page,
+		firstPageNumber,
+		nextPageNumber,
+		prevPageNumber,
+		lastPageNumber,
+		from: page * limit,
+		to: page + 1
+	}
+
+	return {
+		data: data,
+		pagination
+	}
+}
