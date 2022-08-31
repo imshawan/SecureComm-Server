@@ -1,10 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { utilities } = require('../utils');
 
+const controllers = require('../controllers');
+const { validation, authentication } = require('../middlewares');
 
-router.get('/', function(req, res, next) {
-  utilities.handleApiResponse(200, res)
-});
+router.post('/authentication', authentication.verifyUser, controllers.users.checkAuthentication);
 
 module.exports = router;
