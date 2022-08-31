@@ -6,11 +6,11 @@ const Schema = mongoose.Schema;
 const User = new Schema({
     firstname: {
         type: String,
-        default: '',
+        default: 'Default',
     },
     lastname: {
         type: String,
-        default: '',
+        default: 'User',
     },
     username: {
         type: String,
@@ -19,6 +19,14 @@ const User = new Schema({
     email: {
         type: String,
         default: ''
+    },
+    picture: {
+        type: String,
+        default: ''
+    },
+    about: {
+        type: String,
+        default: 'SecureComm user'
     },
     acceptedTerms: {
         type: Boolean,

@@ -18,43 +18,42 @@ userAuth.get = (req, res, next) => {
   }
 
 userAuth.registerUser = (req, res, next) => {
-    OTP.findOne({otp: req.body.otp})
-    .then((otp) => {
-      if (!otp) {
-        return utilities.handleApiResponse(400, res, new Error('Invalid OTP!'));
-      }
-      if (req.body.email != otp.email) {
-        return utilities.handleApiResponse(400, res, new Error('Email provided does not match with the previous one'));
-      }
-      currentTime = Date.now();
-      if (parseInt(currentTime) >= parseInt(otp.expiresIn)) {
-          OTP.findByIdAndRemove(otp._id)
-          .then((e) => (e))
-          return utilities.handleApiResponse(400, res, new Error('This OTP has expired'));
-      }
+    // OTP.findOne({otp: req.body.otp})
+    // .then((otp) => {
+    //   if (!otp) {
+    //     return utilities.handleApiResponse(400, res, new Error('Invalid OTP!'));
+    //   }
+    //   if (req.body.email != otp.email) {
+    //     return utilities.handleApiResponse(400, res, new Error('Email provided does not match with the previous one'));
+    //   }
+    //   currentTime = Date.now();
+    //   if (parseInt(currentTime) >= parseInt(otp.expiresIn)) {
+    //       OTP.findByIdAndRemove(otp._id)
+    //       .then((e) => (e))
+    //       return utilities.handleApiResponse(400, res, new Error('This OTP has expired'));
+    //   }
   
-      User.register(new User({username: req.body.username}), req.body.password, (err, user) => {
-        if (err){
-          return utilities.handleApiResponse(400, res, new Error(err));
-        }
-        else {
-            user.email = req.body.email;
-            user.firstname = req.body.firstname;
-            user.lastname = req.body.lastname;
-            user.acceptedTerms = req.body.acceptedTerms;
-            user.save((err, user) => {
-            if (err) {
-              return utilities.handleApiResponse(400, res, new Error(err));
-            }
-            passport.authenticate('local')(req, res, () => {
-              OTP.findByIdAndRemove(otp._id)
-              .then((e) => (e))
-              return utilities.handleApiResponse(200, res, { message: 'You have successfully signed up!' });
-          });
-        });
+      
+    // }, (err) => {})
+    const { username, password, email } = req.body;
+
+    User.register(new User({username}), password, (err, user) => {
+      if (err){
+        return utilities.handleApiResponse(400, res, new Error(err));
       }
-    });
-    }, (err) => {})
+      else {
+          user.email = email;
+          // user.acceptedTerms = req.body.acceptedTerms;
+          user.save((err, user) => {
+          if (err) {
+            return utilities.handleApiResponse(400, res, new Error(err));
+          }
+          passport.authenticate('local')(req, res, () => {
+            return utilities.handleApiResponse(200, res, { message: 'You have successfully signed up!' });
+        });
+      });
+    }
+  });
   }
 
 userAuth.sendOTP = (req, res, next) => {
