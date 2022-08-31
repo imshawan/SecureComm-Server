@@ -9,7 +9,13 @@ const passport = require('passport');
 const indexRouter = require('./routes/index');
 const config = require('./app.config');
 
-const connect = mongoose.connect(config.mongoUrl, {user: config.mongoUser, pass: String(config.mongoPass)})
+const connect = mongoose.connect(config.mongoUrl, {
+  user: config.mongoUser,
+  pass: String(config.mongoPass),
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
 connect.then((db) => {
   console.info("Established connection with the database!");
 }, (err) => {console.log(err)});
