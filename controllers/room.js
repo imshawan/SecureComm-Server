@@ -13,6 +13,9 @@ room.create = async (req, res) => {
     }
     let room = await Room.find({members: { $all: members }}).populate('creator');
     if (room.length) {
+        if (Array.isArray(room)) {
+            room = room[0];
+        }
         return utilities.handleApiResponse(200, res, room);
     }
     const roomId = await incrementFieldCount('roomId');
