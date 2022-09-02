@@ -1,5 +1,5 @@
 const { utilities, incrementFieldCount } = require('../utils');
-const { Room } = require('../models');
+const { Room, User } = require('../models');
 
 
 const room = module.exports;
@@ -16,17 +16,24 @@ room.create = async (req, res) => {
         if (Array.isArray(room)) {
             room = room[0];
         }
-        return utilities.handleApiResponse(200, res, room);
+    } else {
+        const roomId = await incrementFieldCount('roomId');
+        let payload = {
+            roomId,
+            name,
+            description,
+            members,
+            creator: user._id,
+        }
+        
+        room = await Room.create(payload);
     }
-    const roomId = await incrementFieldCount('roomId');
-    let payload = {
-        roomId,
-        name,
-        description,
-        members,
-        creator: user._id,
-    }
+    
+    room = room._doc || room;
+    let memberDetails = await Promise.all(room.members.map( async (elem) => {
+        let userData = await User.findById(elem, ['firstname', 'lastname', 'username', 'picture']);
+        return {[elem]: userData};
+    }));
 
-    room = await Room.create(payload);
-    utilities.handleApiResponse(200, res, room);
+    utilities.handleApiResponse(200, res, {...room, memberDetails});
 }
