@@ -30,6 +30,13 @@ const app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
+app.set('trust proxy', true);
+console.info(timeStamp(), chalk.yellowBright("Trust-proxy enabled"))
+app.use((req, res, next) => {
+  // Set custom X-Powered-By header
+  res.setHeader('X-Powered-By', 'SecureComm');
+});
+
 // Making a custom logging pattern
 logger.token("custom", `:timestamp ${chalk.magentaBright(":remote-addr")} - ${chalk.greenBright.bold(":method")} :url ${chalk.yellowBright("HTTP/:http-version")} (:status)`);
 logger.token('remote-addr', (req, res) => {
