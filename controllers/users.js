@@ -11,6 +11,12 @@ const userFields = [
     "username"
 ];
 
+users.getUserById = async (req, res) => {
+    let { id } = req.params;
+    let userData = await User.findById(id, userFields);
+    utilities.handleApiResponse(200, res, userData);
+}
+
 users.checkAuthentication = (req, res) => {
     if (req.user && req.user._id) {
         utilities.handleApiResponse(200, res, {authenticated: true})
