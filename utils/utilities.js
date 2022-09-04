@@ -86,3 +86,7 @@ utilities.paginateResponse = (data, count, limit, page) => {
 		pagination
 	}
 }
+
+utilities.timeStamp = () => {
+	return `[${new Date(Date.now()).toISOString()}]`;
+  }

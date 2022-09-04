@@ -5,9 +5,12 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const mongoose = require('mongoose');
 const passport = require('passport');
-
+const chalk = require('chalk')
 const indexRouter = require('./routes/index');
 const config = require('./app.config');
+const { timeStamp } = require('./utils/utilities');
+
+console.info(timeStamp(), chalk.magentaBright("Starting up server..."))
 
 const connect = mongoose.connect(config.mongoUrl, {
   user: config.mongoUser,
@@ -17,7 +20,7 @@ const connect = mongoose.connect(config.mongoUrl, {
 });
 
 connect.then((db) => {
-  console.info("Established connection with the database!");
+  console.info(timeStamp(), chalk.yellowBright("Established connection with the database!"));
 }, (err) => {console.log(err)});
 
 
@@ -27,7 +30,21 @@ const app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-app.use(logger('dev'));
+// Making a custom logging pattern
+logger.token("custom", `:timestamp ${chalk.magentaBright(":remote-addr")} - ${chalk.greenBright.bold(":method")} :url ${chalk.yellowBright("HTTP/:http-version")} (:status)`);
+logger.token('remote-addr', (req, res) => {
+  return req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+})
+logger.token('status', (req, res) => {
+  if (res.statusCode > 400) return chalk.redBright.bold(res.statusCode)
+  else return chalk.greenBright.bold(res.statusCode)
+})
+logger.token('timestamp', () => {
+  return timeStamp()
+})
+app.use(logger('custom'));
+console.info(timeStamp(), chalk.yellowBright("Logger enabled"));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());

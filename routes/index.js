@@ -9,6 +9,11 @@ router.use('/api/v1/users', cors.cors, require('./user'));
 router.use('/api/v1/auth', cors.cors, require('./auth'));
 router.use('/api/v1/rooms', cors.cors, require('./rooms'));
 
+// Check API status
+router.use('/api/status', (req, res) => {
+  utilities.handleApiResponse(200, res, {status: 'Server up and running!'});
+});
+
 // 404 handling
 router.use('/', (req, res) => {
   utilities.handleApiResponse(404, res);
