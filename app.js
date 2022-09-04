@@ -32,10 +32,6 @@ app.set('view engine', 'jade');
 
 app.set('trust proxy', true);
 console.info(timeStamp(), chalk.yellowBright("Trust-proxy enabled"))
-app.use((req, res, next) => {
-  // Set custom X-Powered-By header
-  res.setHeader('X-Powered-By', 'SecureComm');
-});
 
 // Making a custom logging pattern
 logger.token("custom", `:timestamp ${chalk.magentaBright(":remote-addr")} - ${chalk.greenBright.bold(":method")} :url ${chalk.yellowBright("HTTP/:http-version")} (:status)`);
@@ -72,9 +68,10 @@ app.use(function(err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
-
+  
   // render the error page
   res.status(err.status || 500);
+  res.setHeader('X-Powered-By', 'SecureComm');
   res.render('error');
 });
 

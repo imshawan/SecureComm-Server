@@ -39,6 +39,7 @@ utilities.handleApiResponse = function (code, response, data) {
 		payload.payload = data || {};
 	}
 	response.setHeader('Content-Type', 'application/json');
+	response.setHeader('X-Powered-By', 'SecureComm');
 	response.status(code).json(payload);
 }
 
