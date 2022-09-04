@@ -30,7 +30,7 @@ jobs:
           SSH_HOST: ${{ secrets.SSH_HOST }}
 
       - name: Check out the source
-        run: ssh staging 'cd /SecureComm-Server && git pull origin master'
+        run: ssh staging 'cd SecureComm-Server && git pull origin master'
 
       - name: Install dependencies and restart
-        run: ssh staging 'cd /SecureComm-Server && ./npm i && ./pm2 restart 1'
+        run: ssh staging 'cd SecureComm-Server && ./npm i && ./pm2 restart 1'
