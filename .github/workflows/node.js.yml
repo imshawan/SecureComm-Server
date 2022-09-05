@@ -33,4 +33,4 @@ jobs:
         run: ssh staging 'cd /home/ubuntu/SecureComm-Server && git pull origin master'
 
       - name: Install dependencies & re-start the server
-        run: ssh staging 'cd /home/ubuntu/SecureComm-Server && npm install && pm2 restart 0'
+        run: ssh staging 'cd /home/ubuntu/SecureComm-Server && npm install && sudo pm2 restart 0'
