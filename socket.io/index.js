@@ -29,7 +29,7 @@ function onConnection (socket) {
     socket.on('join-room', (sock) => {
         let {room} = sock;
         socket.join(room);
-        console.log(room)
+        console.log(sock)
     })
 
     socket.on('leave-room', (sock) => {
@@ -40,7 +40,9 @@ function onConnection (socket) {
 
     socket.on('message:send', sock => {
         console.log(sock);
-        Sockets.io.in(sock.room).emit('message:receive', sock);
+        // console.log(Sockets.io.sockets.adapter.rooms.get(6))
+        // console.log(Sockets.io.sockets.adapter.rooms.get(3))
+        socket.to(sock.room).emit('message:receive', sock);
     });
 
     // socket.emit('message:receive', {sock})
