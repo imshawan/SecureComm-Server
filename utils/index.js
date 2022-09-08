@@ -4,6 +4,7 @@ const utils = module.exports;
 
 utils.utilities = require('./utilities');
 utils.constants = require('./constants');
+utils.generators = require('./generators');
 
 utils.incrementFieldCount = async function (field) {
     const Obj = await Global.findOneAndUpdate({type: 'globals'}, {$inc: {[field]: 1}}, {upsert: true, new: true});
