@@ -38,6 +38,7 @@ userAuth.registerUser = (req, res, next) => {
     // }, (err) => {})
     const { username, password, email } = req.body;
     const { firstName, lastName } = generators.generateRanzomizedName();
+    const about = generators.generateRanzomizedAbout();
 
     User.register(new User({username}), password, (err, user) => {
       if (err){
@@ -45,8 +46,9 @@ userAuth.registerUser = (req, res, next) => {
       }
       else {
           user.email = email;
-          user.firstName = firstName;
-          user.lastName = lastName;
+          user.firstname = firstName;
+          user.lastname = lastName;
+          user.about = about;
           // user.acceptedTerms = req.body.acceptedTerms;
           user.save((err, user) => {
           if (err) {
