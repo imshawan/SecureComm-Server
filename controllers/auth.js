@@ -2,6 +2,7 @@ const passport = require('passport');
 const { utilities } = require('../utils');
 const { User, OTP } = require('../models');
 const { authentication } = require('../middlewares');
+const { generators } = require('../utils');
 
 const config = require('../app.config');
 
@@ -36,6 +37,7 @@ userAuth.registerUser = (req, res, next) => {
       
     // }, (err) => {})
     const { username, password, email } = req.body;
+    const { firstName, lastName } = generators.generateRanzomizedName();
 
     User.register(new User({username}), password, (err, user) => {
       if (err){
@@ -43,6 +45,8 @@ userAuth.registerUser = (req, res, next) => {
       }
       else {
           user.email = email;
+          user.firstName = firstName;
+          user.lastName = lastName;
           // user.acceptedTerms = req.body.acceptedTerms;
           user.save((err, user) => {
           if (err) {
