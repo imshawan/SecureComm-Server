@@ -45,5 +45,9 @@ function onConnection (socket) {
         socket.to(sock.room).emit('message:receive', sock);
     });
 
+    socket.on('global:message:send', sock => {
+        socket.to(sock.room).emit('global:message:receive', sock);
+    });
+
     // socket.emit('message:receive', {sock})
 }
