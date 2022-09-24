@@ -28,6 +28,22 @@ const User = new Schema({
         type: String,
         default: 'Hey there! SecureComm is really interesting.'
     },
+    location: {
+        type: Object,
+        default: {
+            country: {},
+            region: {},
+            city: {}
+        }
+    },
+    phone: {
+        type: String,
+        default: ''
+    },
+    work: {
+        type: String,
+        default: 'SecureComm User'
+    },
     acceptedTerms: {
         type: Boolean,
         default: false
