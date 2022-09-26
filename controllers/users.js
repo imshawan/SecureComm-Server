@@ -1,19 +1,20 @@
 const { utilities } = require('../utils');
 const { User } = require('../models');
 
-const users = module.exports;
 const userFields = [
-    "_id",
-    "firstname",
-    "lastname",
-    "email",
-    "picture",
-    "username"
+    '_id', 'firstname', 'lastname', 'email', 'picture', 'username', 'about',
+    'location', 'phone', 'work', 'organization'
 ];
+const validUpdatableFields = [
+    'firstname', 'lastname', 'picture', 'about', 
+    'phone', 'work', 'organization'
+];
+
+const users = module.exports;
 
 users.getUserById = async (req, res) => {
     let { id } = req.params;
-    let userData = await User.findById(id, userFields);
+    let userData = await User.findById(id);
     utilities.handleApiResponse(200, res, userData);
 }
 
@@ -41,4 +42,35 @@ users.getUsersByUsername = async (req, res) => {
     ])
 
     utilities.handleApiResponse(200, res, utilities.paginateResponse(users, count, limit, page));
+}
+
+users.updateUserData = async (req, res) => {
+    const { user, body } = req;
+
+    if (user && user._id) {
+        const payload = {};
+
+        validUpdatableFields.forEach((field) => {
+            if (body[field]) {
+                payload[field] = body[field];
+            }
+        });
+
+        const { location } = body;
+
+        if (location) {
+            let locationData = {};
+            ['country', 'region', 'city'].forEach((item) => {
+                if (location[item]) {
+                    locationData[item] = location[item];
+                }
+            });
+
+            payload.location = locationData;
+        }
+
+        await User.findByIdAndUpdate(user._id, { $set: payload }, { new: true });
+
+        utilities.handleApiResponse(200, res, {updated: true});
+    }
 }

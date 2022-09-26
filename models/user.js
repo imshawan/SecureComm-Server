@@ -44,6 +44,10 @@ const User = new Schema({
         type: String,
         default: 'SecureComm User'
     },
+    organization: {
+        type: String,
+        default: ''
+    },
     acceptedTerms: {
         type: Boolean,
         default: false
