@@ -2,7 +2,7 @@ const { utilities } = require('../utils');
 const { User } = require('../models');
 
 const userFields = [
-    '_id', 'firstname', 'lastname', 'email', 'picture', 'username', 'about',
+    '_id', 'firstname', 'lastname', 'email', 'username', 'about',
     'location', 'phone', 'work', 'organization'
 ];
 const validUpdatableFields = [
@@ -73,4 +73,13 @@ users.updateUserData = async (req, res) => {
 
         utilities.handleApiResponse(200, res, {updated: true});
     }
+}
+
+users.updateUserProfile = async (req, res) => {
+    const {user, body} = req;
+    const {picture} = body;
+
+    await User.findByIdAndUpdate(user._id, { $set: {picture} }, { new: true });
+
+    utilities.handleApiResponse(200, res, {message: 'Profile picture changed successfully'});
 }
