@@ -33,7 +33,7 @@ const User = new Schema({
         default: {
             country: {},
             region: {},
-            city: {}
+            city: ''
         }
     },
     phone: {
