@@ -1,5 +1,6 @@
 const { utilities } = require('../utils');
 const { User } = require('../models');
+const passport = require('passport');
 
 const userFields = [
     '_id', 'firstname', 'lastname', 'email', 'username', 'about',
@@ -18,12 +19,13 @@ users.getUserById = async (req, res) => {
     utilities.handleApiResponse(200, res, userData);
 }
 
-users.checkAuthentication = (req, res) => {
-    if (req.user && req.user._id) {
-        utilities.handleApiResponse(200, res, {authenticated: true})
-    } else {
-        utilities.handleApiResponse(401, res, {authenticated: false})
-    }
+users.checkAuthentication = (req, res, next) => {
+    passport.authenticate('jwt', {session: false}, function (err, user, info) {
+        if (user) {
+            return utilities.handleApiResponse(200, res, {authenticated: true});
+        }
+        utilities.handleApiResponse(200, res, {authenticated: false});
+    })(req, res, next);
 }
 
 users.getUsersByUsername = async (req, res) => {
