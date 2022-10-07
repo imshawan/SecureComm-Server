@@ -1,12 +1,13 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { utilities } = require('../utils');
 const SHEET = require('../securecomm-gsheet.json');
+const APP_CONFIG = require('../app.config');
 
 const sheets = module.exports;
 
 const client = SHEET.client_id;
 const key = SHEET.private_key;
-const SHEET_ID = '1KmiE1rhzd2v4qrQ8MurqUBL111HvU2go8m7Q1nRyka8';
+const SHEET_ID = APP_CONFIG.sheetId;
 
 sheets.saveRowToSheet = async (record={}, fields=[], sheetId) => {
     let missingFields = [];
