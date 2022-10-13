@@ -1,6 +1,9 @@
-const { utilities } = require('../utils');
-const { User } = require('../models');
 const passport = require('passport');
+const fs = require('fs');
+const path = require('path');
+const { utilities, constants } = require('../utils');
+const { User } = require('../models');
+
 
 const userFields = [
     '_id', 'firstname', 'lastname', 'email', 'username', 'about',
@@ -10,6 +13,7 @@ const validUpdatableFields = [
     'firstname', 'lastname', 'picture', 'about', 
     'phone', 'work', 'organization'
 ];
+const imagesDir = constants.images;
 
 const users = module.exports;
 
@@ -81,7 +85,27 @@ users.updateUserProfile = async (req, res) => {
     const {user, body} = req;
     const {picture} = body;
 
-    await User.findByIdAndUpdate(user._id, { $set: {picture} }, { new: true });
+    var pictureDir = path.join(imagesDir, 'profiles');
+    
+    if (!fs.existsSync(pictureDir)){
+        fs.mkdirSync(pictureDir, { recursive: true });
+    }
+    
+    var imageBuffer = utilities.decodeBase64Image(picture);
+
+    if (!utilities.isSupportedImageType(imageBuffer.type)) {
+        utilities.handleApiResponse(400, res, new Error('Invalid image! Type not supported.'));
+    }
+
+    var imageExtension = utilities.getImageFileExtension(imageBuffer.type);
+    var fileName = utilities.generateFilename('profile-' + user._id) + imageExtension;
+    var picturePath = path.join(pictureDir, fileName);
+    var pictureUrl = imagesDir.replace('\\', '/') + '/profiles/' + fileName;
+
+
+    fs.writeFileSync(picturePath, imageBuffer.data);
+
+    await User.findByIdAndUpdate(user._id, { $set: {picture: pictureUrl.replace('\\', '/')} }, { new: true });
 
     utilities.handleApiResponse(200, res, {message: 'Profile picture changed successfully'});
 }

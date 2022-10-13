@@ -9,6 +9,7 @@ const chalk = require('chalk')
 const indexRouter = require('./routes/index');
 const config = require('./app.config');
 const { timeStamp } = require('./utils/utilities');
+const { authentication } = require('./middlewares');
 
 console.info(timeStamp(), chalk.magentaBright("Starting up server..."))
 
@@ -49,12 +50,14 @@ app.use(logger('custom'));
 console.info(timeStamp(), chalk.yellowBright("Logger enabled"));
 
 app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: false, limit: "50mb" }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // initialize passport middleware for the app
 app.use(passport.initialize());
+
+app.use('/assets', authentication.verifyUser, express.static(path.join(__dirname, 'uploads')));
 
 app.use('/', indexRouter);
 

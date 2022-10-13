@@ -1,3 +1,7 @@
+const path = require('path');
+
+const FILES_LOCATION = 'uploads';
+
 module.exports = {
     statusCodeWithError: {
         200: 'OK',
@@ -33,5 +37,20 @@ module.exports = {
         403: 'Forbidden! You are not authorized for making this API call',
         404: 'The API endpoint wasn\'t not found on our server',
         500: 'The server encountered an error and was unable to process this request',
-    }
+    },
+    baseDir: __dirname,
+    files: FILES_LOCATION,
+    images: path.join(FILES_LOCATION, 'images'),
+    allowedImageExtensions: {
+        bmp: 'image/bmp',
+        gif: 'image/gif',
+        ief: 'image/ief',
+        jfif: 'image/pipeg',
+        jpeg: 'image/jpeg',
+        jpg: 'image/jpeg',
+        png: 'image/png',
+        svg: 'image/svg+xml',
+        tif: 'image/tiff',
+        tiff: 'image/tiff',
+    },
 }

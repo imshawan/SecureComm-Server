@@ -1,4 +1,4 @@
-const { statusCodeWithError, statusCodeWithMessage } = require('./constants');
+const { statusCodeWithError, statusCodeWithMessage, allowedImageExtensions } = require('./constants');
 
 const utilities = module.exports;
 
@@ -94,4 +94,31 @@ utilities.timeStamp = () => {
 
 utilities.capitalizeFirstLetter = (string) => {
 	return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+
+utilities.decodeBase64Image = (dataString) => {
+	var matches = dataString.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/),
+	  response = {};
+  
+	if (matches.length !== 3) {
+	  return new Error('Invalid input string');
+	}
+  
+	response.type = matches[1];
+	response.data = Buffer.from(matches[2], 'base64');
+  
+	return response;
+  }
+
+utilities.generateFilename = (prefix='') => {
+	return [prefix, '-', Date.now(), '.'].join('');
+ }
+
+utilities.getImageFileExtension = (value) => {
+	return Object.keys(allowedImageExtensions).find(key => allowedImageExtensions[key] === value);
+ }
+
+utilities.isSupportedImageType = (type) => {
+	return Object.values(allowedImageExtensions).includes(type)
 }
