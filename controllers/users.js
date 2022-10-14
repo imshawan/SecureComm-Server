@@ -6,8 +6,7 @@ const { User } = require('../models');
 
 
 const userFields = [
-    '_id', 'firstname', 'lastname', 'email', 'username', 'about',
-    'location', 'phone', 'work', 'organization'
+    '_id', 'firstname', 'lastname', 'email', 'username', 'picture'
 ];
 const validUpdatableFields = [
     'firstname', 'lastname', 'picture', 'about', 
