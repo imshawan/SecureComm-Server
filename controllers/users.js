@@ -107,5 +107,5 @@ users.updateUserProfile = async (req, res) => {
 
     await User.findByIdAndUpdate(user._id, { $set: {picture: pictureUrl.replace('\\', '/')} }, { new: true });
 
-    utilities.handleApiResponse(200, res, {message: 'Profile picture changed successfully'});
+    utilities.handleApiResponse(200, res, {message: 'Profile picture changed successfully', picture: pictureUrl});
 }
