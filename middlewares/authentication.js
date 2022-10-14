@@ -16,9 +16,9 @@ passport.deserializeUser(User.deserializeUser());
 
 exports.getToken = function(user, remember_me) {
     // Remember me for 10 days max
-    const ExpirationTime = remember_me ? '10d' : config.expiresIn;
-    return jwt.sign(user, config.secretKey,
-        { expiresIn: ExpirationTime });
+    // const ExpirationTime = remember_me ? '10d' : config.expiresIn;
+    return jwt.sign(user, config.secretKey);
+        // { expiresIn: ExpirationTime });
 };
 
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();

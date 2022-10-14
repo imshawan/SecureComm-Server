@@ -108,6 +108,10 @@ userAuth.sendOTP = (req, res, next) => {
     }
   }
 
+  userAuth.signOut = (req, res, next) => {
+    const {body, user} = req;
+  }
+
   userAuth.forgotPassword = (req, res) => {
     let token = utilities.generateOtp(6);
   
