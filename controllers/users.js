@@ -102,10 +102,12 @@ users.updateUserProfile = async (req, res) => {
     var picturePath = path.join(pictureDir, fileName);
     var pictureUrl = imagesDir.replace('\\', '/') + '/profiles/' + fileName;
 
+    pictureUrl = pictureUrl.replace('uploads', 'assets');
+
 
     fs.writeFileSync(picturePath, imageBuffer.data);
 
-    await User.findByIdAndUpdate(user._id, { $set: {picture: pictureUrl.replace('\\', '/')} }, { new: true });
+    await User.findByIdAndUpdate(user._id, { $set: {picture: pictureUrl} }, { new: true });
 
     utilities.handleApiResponse(200, res, {message: 'Profile picture changed successfully', picture: pictureUrl});
 }
