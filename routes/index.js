@@ -16,7 +16,7 @@ router.use('/api/status', (req, res) => {
 });
 
 // 404 handling
-router.use('/', (req, res) => {
+router.use('/*', (req, res) => {
   utilities.handleApiResponse(404, res);
 });
 
