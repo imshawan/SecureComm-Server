@@ -12,7 +12,7 @@ users.getUserById = async (req, res) => {
     }
 }
 
-users.checkAuthentication = async (req, res) => {
+users.checkAuthentication = async (req, res, next) => {
     try {
         utilities.handleApiResponse(200, res, await api.users.checkAuthentication(req, res, next));
     } catch (err) {
