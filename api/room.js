@@ -4,6 +4,17 @@ const { Room, User } = require('../models');
 
 const room = module.exports;
 
+const userFields = [
+  "firstname",
+  "lastname",
+  "username",
+  "picture",
+  "location",
+  "work",
+  "email",
+  "about",
+];
+
 room.fetchExistingOrcreate = async (req, res) => {
     const { user } = req;
     const { members, name, description } = req.body;
@@ -31,7 +42,7 @@ room.fetchExistingOrcreate = async (req, res) => {
     
     room = room._doc || room;
     let memberDetails = await Promise.all(room.members.map( async (elem) => {
-        let userData = await User.findById(elem, ['firstname', 'lastname', 'username', 'picture']);
+        let userData = await User.findById(elem, userFields);
         return {[elem]: userData};
     }));
 
