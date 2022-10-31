@@ -13,6 +13,7 @@ const userFields = [
   "work",
   "email",
   "about",
+  "createdAt"
 ];
 
 room.fetchExistingOrcreate = async (req, res) => {
