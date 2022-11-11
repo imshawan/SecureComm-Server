@@ -1,6 +1,6 @@
 const passport = require('passport');
 const { utilities } = require('../utils');
-const { User, OTP } = require('../models');
+const { User, OTP, Session } = require('../models');
 const { authentication } = require('../middlewares');
 const { generators } = require('../utils');
 
@@ -90,32 +90,50 @@ userAuth.sendOTP = (req) => {
     });
   }
 
-  userAuth.signIn = (req) => {
-    return new Promise((resolve, reject) => {
-      const token = authentication.getToken({_id: req.user._id}, req.body.remember_me);
-      if (token) {
-        const payload = {
-          token, message: 'You have successfully logged in!'
-        };
-        User.findById({_id: req.user._id}, (err, user) => {
-          if (err) {
-            reject(err.message)
-          } else {
-            payload.user = user && user._doc ? user._doc : {};
-            if (payload.user.payload) {
-              delete payload.user.payload;
-            }
-            resolve(payload);
-          }
-        });
-      } else {
-        reject("Something went wrong!");
+  userAuth.signIn = async (req) => {
+    const {deviceId} = req.body;
+    const token = authentication.getToken({_id: req.user._id}, req.body.remember_me);
+    if (token) {
+      const payload = {
+        token, message: 'You have successfully logged in!'
+      };
+      const sessionPayload = {};
+
+      let user = await User.findById({_id: req.user._id});
+      if (!user) {
+        throw new Error('User not found!');
       }
-    });
+
+      payload.user = user && user._doc ? user._doc : {};
+      if (payload.user.payload) {
+        delete payload.user.payload;
+      }
+
+      let session = await Session.findOne({user: payload.user._id});
+      if (session) {
+        throw new Error('Cannot login into multiple devices at the same time');
+      }
+
+      sessionPayload.token = token;
+      sessionPayload.user = payload.user._id;
+      sessionPayload.deviceId = deviceId;
+
+      await Session.findOneAndUpdate({user: sessionPayload.user}, sessionPayload, {upsert: true, useFindAndModify: false});
+
+      return payload;
+
+    }
   }
 
   userAuth.signOut = async (req) => {
-    const {body, user} = req;
+    const {user} = req;
+
+    let session = await Session.findOne({user: user._id});
+    if (session) {
+      await Session.findOneAndRemove({user: user._id}, {useFindAndModify: false});
+    }
+
+    return {message: 'Logged out successfully'};
   }
 
   userAuth.forgotPassword = (req) => {

@@ -13,6 +13,10 @@ const sessionSchema = new Schema({
     deviceId: {
         type: String,
         required: true
+    },
+    expiresAt: {
+        type: String,
+        default: ''
     }
 },{
     timestamps: true

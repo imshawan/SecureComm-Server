@@ -3,7 +3,9 @@ const LocalStrategy = require('passport-local').Strategy;
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
 const jwt = require('jsonwebtoken');
+const {Session} = require('../models');
 
+const {utilities} = require('../utils');
 const { User } = require('../models');
 const config = require('../app.config');
 
@@ -39,4 +41,19 @@ exports.jwtPassport = passport.use(new JwtStrategy(opts,
         });
     }));
 
-exports.verifyUser = passport.authenticate('jwt', {session: false});
+exports.verifyUser = async function (req, res, next) {
+    const authorizationToken = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+
+    passport.authenticate('jwt', {session: false}, async function (err, user) {
+        if (err || !user) {
+            return utilities.handleApiResponse(401, res, new Error('Unauthorized! A valid token was not found with this request'));
+        }
+        let session = await Session.findOne({user: user._id});
+        if (!session || session.token != authorizationToken) {
+            return utilities.handleApiResponse(401, res, new Error('Unable to verify the token! Please retry logging in'));
+        }
+        req.user = user;
+
+        next();
+    })(req, res, next);
+}
