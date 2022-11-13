@@ -8,6 +8,7 @@ router.get('/username', authentication.verifyUser, controllers.users.getUsersByU
 router.get('/:id', authentication.verifyUser, controllers.users.getUserById);
 router.put('/update', authentication.verifyUser, controllers.users.updateUserData);
 router.put('/picture', authentication.verifyUser, validation.checkRequiredFields.bind(null, ['picture']), controllers.users.updateUserProfile);
+router.delete('/picture', authentication.verifyUser, controllers.users.removeUserProfilePicture);
 
 router.post('/authentication', controllers.users.checkAuthentication);
 

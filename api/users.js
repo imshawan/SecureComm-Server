@@ -111,3 +111,10 @@ users.updateUserProfile = async (req) => {
 
     return {message: 'Profile picture changed successfully', picture: pictureUrl};
 }
+
+users.removeUserProfilePicture = async (req) => {
+    const {user} = req;
+    await User.findByIdAndUpdate(user._id, { $set: {picture: ''} }, { new: true });
+
+    return {message: 'Profile picture was removed successfully'};
+}
