@@ -13,6 +13,10 @@ const otpSchema = new Schema({
     email: {
         type: String,
         default: '',
+    },
+    action: {
+        type: String,
+        default: '',
     }
 },{
     timestamps: true

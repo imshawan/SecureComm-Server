@@ -8,6 +8,13 @@ const config = require('../app.config');
 
 const userAuth = module.exports;
 
+const SIGN_UP = 'signup', 
+    PASSWORD_RESET = 'password_reset',
+    CHANGE_PASSWORD = 'change_password',
+    CHANGE_EMAIL = 'change_email';
+
+const validOtpActions = [SIGN_UP, PASSWORD_RESET, CHANGE_PASSWORD, CHANGE_EMAIL];
+
 userAuth.get = (req) => {
     return new Promise((resolve, reject) => {
       User.find({}, (err, users) => {
@@ -66,28 +73,34 @@ userAuth.registerUser = (req, res) => {
     });
   }
 
-userAuth.sendOTP = (req) => {
-    return new Promise((resolve, reject) => {
-      var token = utilities.generateOtp(6)
-  
-      User.findOne({ email: req.body.email }, function(err, user) {
-          if (!user) {
-            var payload = {}
-            payload.otp = token;
-            payload.email = req.body.email;
-            payload.expiresIn = Date.now() + 300000; // 5 min
-      
-            OTP.create(payload).then(() => {
-                resolve({message: 'An e-mail with OTP has been sent to ' + req.body.email + '.'})
-            }).catch((err) => {
-                reject(err.message);
-            });
-          }
-          else {
-            reject('An account with that email address already exists');
-          }
-        })
-    });
+userAuth.sendOTP =  async (req) => {
+    const {action, email} = req.body;
+    if (!validOtpActions.includes(action)) {
+      throw new Error( `Invalid action '${action}' for generating the OTP`);
+    }
+    
+    const token = utilities.generateOtp(6);
+    const user = await User.findOne({ email });
+    const payload = {
+      otp: token, 
+      email, 
+      expiresIn: Date.now() + 300000, // 5 min
+      action,
+    };
+
+    if (action == SIGN_UP) {
+      if (user) {
+        throw new Error('An account with that email address already exists');
+      }
+    }
+
+    if (!user) {
+      throw new Error(`Account with email ${email} doesn't exist on our servers`);
+    }
+
+    await OTP.findOneAndUpdate({email}, {$set: payload}, {upsert: true});
+    console.log(payload)
+    return {message: 'An e-mail with code has been sent to ' + email};
   }
 
   userAuth.signIn = async (req) => {
@@ -216,4 +229,31 @@ userAuth.changePassword = (req) => {
       }
     });
   });
+}
+
+userAuth.changeEmail = async (req) => {
+  const { oldEmail, newEmail, code } = req.body;
+  const {user} = req;
+
+  const codeObj = await OTP.findOne({email: oldEmail, action: CHANGE_EMAIL});
+
+  if (user.email != oldEmail) {
+    throw new Error('The supplied email id doesn\'t exists on our servers');
+  }
+
+  if (!codeObj) {
+    throw new Error('Invalid code');
+  }
+
+  if (codeObj.email != oldEmail) {
+    throw new Error('The supplied code isn\'t associated with the email ' + oldEmail);
+  }
+
+  if (codeObj.otp != code) {
+    throw new Error('The code doesn\'t match with the one that was sent');
+  }
+
+  await User.findByIdAndUpdate(user._id, {$set: {email: newEmail}}, {useFindAndModify: false});
+
+  return {message: 'Email changed succesfully!'};
 }
