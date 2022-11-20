@@ -11,7 +11,6 @@ router.post('/register', validation.checkRequiredFields.bind(null, ['email', 'us
 router.post('/signin', validation.checkRequiredFields.bind(null, ['username', 'password', 'deviceId']), passport.authenticate('local'), controllers.auth.signIn);
 router.post('/signout', authentication.verifyUser, controllers.auth.signOut);
 
-router.post('/password/forgot', validation.checkRequiredFields.bind(null, ['email']), controllers.auth.forgotPassword);
 router.post('/password/reset', validation.checkRequiredFields.bind(null, ['email', 'otp', 'password']), controllers.auth.resetPassword);
 router.post('/password/change', validation.checkRequiredFields.bind(null, ['oldPassword', 'newPassword']), authentication.verifyUser, controllers.auth.changePassword);
 router.post('/email/change', validation.checkRequiredFields.bind(null, ['oldEmail', 'newEmail', 'code']), authentication.verifyUser, controllers.auth.changeEmail);

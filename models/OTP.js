@@ -17,6 +17,10 @@ const otpSchema = new Schema({
     action: {
         type: String,
         default: '',
+    },
+    revoked: {
+        type: Boolean,
+        default: false,
     }
 },{
     timestamps: true

@@ -27,7 +27,7 @@ userAuth.get = (req) => {
     });
   }
 
-userAuth.registerUser = (req, res) => {
+userAuth.registerUser = async (req, res) => {
     // OTP.findOne({otp: req.body.otp})
     // .then((otp) => {
     //   if (!otp) {
@@ -46,11 +46,22 @@ userAuth.registerUser = (req, res) => {
       
     // }, (err) => {})
     const { username, password, email } = req.body;
+    const [emailExists, usernameExists] = await Promise.all([
+      User.findOne({ email }),
+      User.findOne({ username }),
+    ]);
+    if (emailExists) {
+      throw new Error('An account with the supplied email id already exists');
+    }
+
+    if (usernameExists) {
+      throw new Error('An account with the supplied username already exists');
+    }
+
+    const { firstName, lastName } = generators.generateRanzomizedName();
+    const about = generators.generateRanzomizedAbout();
 
     return new Promise((resolve, reject) => {
-      const { firstName, lastName } = generators.generateRanzomizedName();
-      const about = generators.generateRanzomizedAbout();
-
       User.register(new User({username}), password, (err, user) => {
         if (err){
           reject(err);
@@ -80,11 +91,13 @@ userAuth.sendOTP =  async (req) => {
     }
     
     const token = utilities.generateOtp(6);
+    const expiryTime = (Date.now() + 300000); // 5 min
+
     const user = await User.findOne({ email });
     const payload = {
       otp: token, 
       email, 
-      expiresIn: Date.now() + 300000, // 5 min
+      expiresIn: expiryTime,
       action,
     };
 
@@ -99,6 +112,14 @@ userAuth.sendOTP =  async (req) => {
     }
 
     await OTP.findOneAndUpdate({email}, {$set: payload}, {upsert: true});
+
+    if (action == CHANGE_PASSWORD) {
+      await User.findByIdAndUpdate(user._id, { $set: {payload: {
+        passwordToken: token,
+        expiresIn: expiryTime,
+      }} }, { new: true });
+    }
+
     console.log(payload)
     return {message: 'An e-mail with code has been sent to ' + email};
   }
@@ -147,29 +168,6 @@ userAuth.sendOTP =  async (req) => {
     }
 
     return {message: 'Logged out successfully'};
-  }
-
-  userAuth.forgotPassword = (req) => {
-    return new Promise((resolve, reject) => {
-      let token = utilities.generateOtp(6);
-  
-      User.findOne({ email: req.body.email }, (err, user) => {
-        if (!user) {
-          reject('Account with that email address doesn\'t exists');
-        }
-        var payload = {}
-        payload.passwordToken = token;
-        payload.expiresIn = Date.now() + 300000; // 5 min
-
-        User.findByIdAndUpdate(user._id, { $set: {payload} }, { new: true })
-        .then(() => {
-          resolve({message: 'An e-mail with OTP has been sent to ' + user.email + ' with further instructions.'});
-        })
-        .catch(() => {
-          reject('Some error occured!');
-        })
-      });
-    });
   }
 
 userAuth.resetPassword = (req) => {
@@ -253,7 +251,10 @@ userAuth.changeEmail = async (req) => {
     throw new Error('The code doesn\'t match with the one that was sent');
   }
 
-  await User.findByIdAndUpdate(user._id, {$set: {email: newEmail}}, {useFindAndModify: false});
+  await Promise.all([
+    User.findByIdAndUpdate(user._id, {$set: {email: newEmail}}, {useFindAndModify: false}),
+    OTP.findByIdAndUpdate(codeObj._id, {$set: {revoked: true}}, {useFindAndModify: false}),
+  ]);
 
   return {message: 'Email changed succesfully!'};
 }

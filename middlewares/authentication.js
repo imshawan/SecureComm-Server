@@ -43,6 +43,7 @@ exports.jwtPassport = passport.use(new JwtStrategy(opts,
 
 exports.verifyUser = async function (req, res, next) {
     const authorizationToken = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+    const {deviceid} = req.headers; // Check the incoming device id with the session's device id, on fail reject the request
 
     passport.authenticate('jwt', {session: false}, async function (err, user) {
         if (err || !user) {

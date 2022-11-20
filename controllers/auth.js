@@ -43,14 +43,6 @@ userAuth.signOut = async (req, res) => {
   }
 }
 
-userAuth.forgotPassword = async (req, res) => {
-  try {
-    utilities.handleApiResponse(200, res, await api.auth.forgotPassword(req));
-  } catch (err) {
-    utilities.handleApiResponse(400, res, new Error(err.message));
-  }
-}
-
 userAuth.resetPassword = async (req, res) => {
   try {
     utilities.handleApiResponse(200, res, await api.auth.resetPassword(req));
