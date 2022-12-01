@@ -4,6 +4,7 @@ const utilities = module.exports;
 
 
 utilities.handleApiResponse = function (code, response, data) {
+	const {req} = response;
 	const payload = {
 		status: {},
 		payload: {}
@@ -14,6 +15,7 @@ utilities.handleApiResponse = function (code, response, data) {
 		payload.status = {
 			success: true,
 			error,
+			route: req.originalUrl,
 			message: 'Ok',
 		};
 		payload.payload = data || {};
@@ -25,6 +27,7 @@ utilities.handleApiResponse = function (code, response, data) {
 		payload.status = {
 			success: false,
 			error,
+			route: req.originalUrl,
 			message,
 		};
 	} else {
@@ -34,6 +37,7 @@ utilities.handleApiResponse = function (code, response, data) {
 		payload.status = {
 			success: false,
 			error,
+			route: req.originalUrl,
 			message,
 		};
 		payload.payload = data || {};

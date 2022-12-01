@@ -75,7 +75,7 @@ users.updateUserData = async (req) => {
             payload.location = locationData;
         }
 
-        await User.findByIdAndUpdate(user._id, { $set: payload }, { new: true });
+        await User.findByIdAndUpdate(user._id, { $set: payload }, { new: true, useFindAndModify: false });
 
         return {updated: true};
     }
