@@ -1,9 +1,15 @@
 const { Server } = require('socket.io');
 const passport = require('passport');
 const {ExtractJwt} = require('passport-jwt');
+const chalk = require('chalk');
 const {Session} = require('../models');
+const userUtils = require('./user');
+const {timeStamp} = require('../utils/utilities');
 
 const Sockets = module.exports;
+
+const inactivityTime = (1000 * 60) * 2; // 2 minutes
+var connectedUsers = [];
 
 Sockets.init = function (server) {
 
@@ -26,6 +32,7 @@ Sockets.init = function (server) {
     
     socketIO.listen(server, sockOptions);
     Sockets.io = socketIO;
+    console.info(timeStamp(), chalk.yellowBright(`Soeket.IO listening to incoming connections`));
 }
 
 async function authenticate (socket, next) {
@@ -48,28 +55,56 @@ async function authenticate (socket, next) {
             return next(new Error('Unable to verify the token! Please retry logging in'));
         }
 
+        socket.user = user;
         next();
     })(socketRequest, {}, next);
 }
 
 function onConnection (socket) {
+    var inactivityTimer, socketUserId = String(socket.user._id).trim();
+    var index = connectedUsers.indexOf(socketUserId);
+    if (index === -1) {
+        connectedUsers.push(socketUserId);
+    }
+    if (socket.user && socket.user.status === 'offline') {
+        // I will not use await here so that the execution doesn't stop right here.
+        userUtils.updateUserPresence(socketUserId, 'online');
+    }
+
+    socket.on('disconnect', async () => {
+        let userIndex = connectedUsers.indexOf(socketUserId);
+        if (userIndex > -1) {
+            connectedUsers.splice(userIndex, 1);
+            await userUtils.updateUserPresence(socketUserId, 'offline');
+        }
+    });
 
     socket.on('join-room', (sock) => {
         let {room} = sock;
         socket.join(room);
-        console.log(sock)
+        // console.log(sock)
     })
 
     socket.on('leave-room', (sock) => {
         let {room} = sock;
         socket.leave(room);
-        console.log(room)
-    })
+        // console.log(room)
+    });
+
+    socket.on('user:ping', async (sock) => {
+        const {status} = sock;
+        if (typeof inactivityTimer === 'function') {
+            clearTimeout(inactivityTimer);
+        }
+
+        await userUtils.updateUserPresence(socketUserId, 'online');
+        inactivityTimer = setTimeout(userUtils.updateUserPresence.bind(null, socketUserId, 'offline'), inactivityTime);
+        socket.to(sock.room).emit('user:pong', sock);
+    });
 
     socket.on('message:send', sock => {
         console.log(sock);
         // console.log(Sockets.io.sockets.adapter.rooms.get(6))
-        // console.log(Sockets.io.sockets.adapter.rooms.get(3))
         socket.to(sock.room).emit('message:receive', sock);
     });
 
@@ -77,5 +112,4 @@ function onConnection (socket) {
         socket.to(sock.room).emit('global:message:receive', sock);
     });
 
-    // socket.emit('message:receive', {sock})
 }

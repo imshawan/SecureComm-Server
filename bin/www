@@ -39,6 +39,7 @@ server.on('listening', onListening);
 /**
  * Initializing sockets on http server.
  */
+console.info(timeStamp(), chalk.yellowBright(`Initializing Socket.IO...`));
 socketIO.init(server);
 
 /**

@@ -96,6 +96,10 @@ utilities.timeStamp = () => {
 	return `[${new Date(Date.now()).toISOString()}]`;
   }
 
+utilities.getISOTimestamp = () => {
+	return new Date(Date.now()).toISOString();
+}
+
 utilities.capitalizeFirstLetter = (string) => {
 	return string.charAt(0).toUpperCase() + string.slice(1);
 }

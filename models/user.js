@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const passportLocalMongoose = require('passport-local-mongoose');
+const utilities = require('../utils/utilities');
 
 const Schema = mongoose.Schema;
 
@@ -27,6 +28,14 @@ const User = new Schema({
     about: {
         type: String,
         default: 'Hey there! SecureComm is really interesting.'
+    },
+    status: {
+        type: String,
+        default: '',
+    },
+    lastActive: {
+        type: String,
+        default: utilities.getISOTimestamp(),
     },
     location: {
         type: Object,
