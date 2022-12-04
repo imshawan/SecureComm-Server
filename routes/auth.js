@@ -13,7 +13,7 @@ router.post('/signout', authentication.verifyUser, controllers.auth.signOut);
 
 router.post('/password/reset', validation.checkRequiredFields.bind(null, ['email', 'otp', 'password']), controllers.auth.resetPassword);
 router.post('/password/change', validation.checkRequiredFields.bind(null, ['oldPassword', 'newPassword']), authentication.verifyUser, controllers.auth.changePassword);
-router.post('/email/change', validation.checkRequiredFields.bind(null, ['oldEmail', 'newEmail', 'code']), authentication.verifyUser, controllers.auth.changeEmail);
+router.post('/email/change', validation.checkRequiredFields.bind(null, ['oldEmail', 'newEmail', 'oldEmailCode', 'newEmailCode']), authentication.verifyUser, controllers.auth.changeEmail);
 
 
 module.exports = router;

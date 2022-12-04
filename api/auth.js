@@ -2,7 +2,7 @@ const passport = require('passport');
 const { utilities } = require('../utils');
 const { User, OTP, Session } = require('../models');
 const { authentication } = require('../middlewares');
-const { generators } = require('../utils');
+const { generators, emailer } = require('../utils');
 
 const config = require('../app.config');
 
@@ -85,7 +85,7 @@ userAuth.registerUser = async (req, res) => {
   }
 
 userAuth.sendOTP =  async (req) => {
-    const {action, email} = req.body;
+    const {action, email, newEmail} = req.body;
     if (!validOtpActions.includes(action)) {
       throw new Error( `Invalid action '${action}' for generating the OTP`);
     }
@@ -111,7 +111,7 @@ userAuth.sendOTP =  async (req) => {
       throw new Error(`Account with email ${email} doesn't exist on our servers`);
     }
 
-    await OTP.findOneAndUpdate({email}, {$set: payload}, {upsert: true});
+    await OTP.findOneAndUpdate({email}, {$set: payload}, {upsert: true, useFindAndModify: false});
 
     if (action == CHANGE_PASSWORD) {
       await User.findByIdAndUpdate(user._id, { $set: {payload: {
@@ -120,7 +120,32 @@ userAuth.sendOTP =  async (req) => {
       }} }, { new: true });
     }
 
-    console.log(payload)
+    if (action == CHANGE_EMAIL) {
+      let newEmailCode = utilities.generateOtp(6);
+      let chechForDuplicateEmail = await User.findOne({ email: newEmail });
+      if (chechForDuplicateEmail) {
+        throw new Error(`An Account with email ${email} already exists`);
+      }
+      await User.findByIdAndUpdate(user._id, { $set: {payload: {
+        emailTokens: [{
+          emailId: email,
+          token,
+        }, {
+          emailId: newEmail,
+          token: newEmailCode,
+        }],
+        expiresIn: expiryTime,
+      }} }, { new: true, useFindAndModify: false });
+
+      await Promise.all([
+        emailer.sendEmail(email, action, {email, code: token}),
+        emailer.sendEmail(newEmail, action, {email: newEmail, code: newEmailCode})
+      ]);
+
+      return {message: 'E-mail with verification codes has been sent to ' + [email, newEmail].join(' and ')};
+    }
+
+    console.log(payload);
     return {message: 'An e-mail with code has been sent to ' + email};
   }
 
@@ -230,10 +255,23 @@ userAuth.changePassword = (req) => {
 }
 
 userAuth.changeEmail = async (req) => {
-  const { oldEmail, newEmail, code } = req.body;
+  const { oldEmail, newEmail, oldEmailCode, newEmailCode } = req.body;
   const {user} = req;
+  const {emailTokens=[]} = user.payload || {};
+  const currentTime = Date.now();
+  let newEmailPayload = {};
+
+  if (emailTokens.length < 2) {
+    throw new Error('Verification code wasn\'t requested for this operation');
+  }
+
+  newEmailPayload = emailTokens.find(el => el.emailId && el.emailId == newEmail);
+  if (!newEmailPayload) {
+    throw new Error("Supplied 'new-emails' doesn't match, please re-try the process");
+  }
 
   const codeObj = await OTP.findOne({email: oldEmail, action: CHANGE_EMAIL});
+  const {expiresIn} = codeObj;
 
   if (user.email != oldEmail) {
     throw new Error('The supplied email id doesn\'t exists on our servers');
@@ -247,12 +285,20 @@ userAuth.changeEmail = async (req) => {
     throw new Error('The supplied code isn\'t associated with the email ' + oldEmail);
   }
 
-  if (codeObj.otp != code) {
-    throw new Error('The code doesn\'t match with the one that was sent');
+  if (currentTime > Number(expiresIn)) {
+    throw new Error('The code has been expired, please request for new codes');
+  }
+
+  if (newEmailPayload.token != newEmailCode) {
+    throw new Error('The code doesn\'t match with the one that was sent to ' + newEmail);
+  }
+
+  if (codeObj.otp != oldEmailCode) {
+    throw new Error('The code doesn\'t match with the one that was sent to ' + oldEmail);
   }
 
   await Promise.all([
-    User.findByIdAndUpdate(user._id, {$set: {email: newEmail}}, {useFindAndModify: false}),
+    User.findByIdAndUpdate(user._id, {$set: {email: newEmail, payload: null}}, {useFindAndModify: false}),
     OTP.findByIdAndUpdate(codeObj._id, {$set: {revoked: true}}, {useFindAndModify: false}),
   ]);
 

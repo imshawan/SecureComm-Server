@@ -3,12 +3,22 @@ const { sendgrid } = require('../app.config');
 
 sendgridMail.setApiKey(sendgrid.API_KEY);
 
-function sendEmail (recipient, subject, message) {}
+const emailer = module.exports;
 
-const msg = {
-  to: 'test@example.com', // Change to your recipient
-  from: 'test@example.com', // Change to your verified sender
-  subject: 'Sending with SendGrid is Fun',
-  text: 'and easy to do anywhere, even with Node.js',
-  html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+emailer.sendEmail = async (recipient, template, data) => {
+    const {subject, content} = populateEmailContent(template, data);
+    await sendgridMail.send({
+      to: recipient,
+      from: sendgrid.SENDER,
+      subject,
+      html: content,
+    })
+}
+
+function populateEmailContent (template, data) {
+    const json = {
+      subject: "Code for password reset",
+      content: `<strong>${data.code} is your code for changing your email</strong>`
+    }
+    return json
 }
