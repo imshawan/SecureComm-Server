@@ -21,6 +21,10 @@ const User = new Schema({
         type: String,
         default: ''
     },
+    isEmailVerified: {
+        type: Boolean,
+        default: false,
+    },
     picture: {
         type: String,
         default: ''
