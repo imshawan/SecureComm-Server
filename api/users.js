@@ -118,3 +118,8 @@ users.removeUserProfilePicture = async (req) => {
 
     return {message: 'Profile picture was removed successfully'};
 }
+
+users.getUserActivityStatus = async (req) => {
+    const {user} = req;
+    return await User.findOne({_id: user._id}, ['status', 'lastActive']);
+}

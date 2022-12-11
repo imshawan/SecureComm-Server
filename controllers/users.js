@@ -51,3 +51,11 @@ users.removeUserProfilePicture = async (req, res) => {
         utilities.handleApiResponse(400, res, new Error(err.message));
     }
 }
+
+users.getUserActivityStatus = async (req, res) => {
+    try {
+        utilities.handleApiResponse(200, res, await api.users.getUserActivityStatus(req));
+    } catch (err) {
+        utilities.handleApiResponse(400, res, new Error(err.message));
+    }
+}
