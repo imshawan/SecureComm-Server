@@ -34,12 +34,15 @@ users.checkAuthentication = async (req, res, next) => {
 
 users.getUsersByUsername = async (req) => {
     const { page=0, limit=8, query } = req.query;
-    let username = new RegExp(query.trim());
-    let keys = {
-        username: {
-            $regex: username,
-            $options: '$i'
-        }
+    let queryString = query.trim();
+
+    let queryObj = {
+        $regex: new RegExp(queryString),
+        $options: '$i'
+    };
+
+    const keys = {
+        $or: [{username: queryObj}, {firstname: queryObj}, {lastname: queryObj}],
     };
 
     const [users, count=0] = await Promise.all([
