@@ -1,4 +1,4 @@
-const { incrementFieldCount } = require('../utils');
+const { incrementFieldCount, utilities } = require('../utils');
 const { Room, User } = require('../models');
 
 
@@ -19,6 +19,7 @@ const userFields = [
 room.fetchExistingOrcreate = async (req, res) => {
     const { user } = req;
     const { members, name, description } = req.body;
+    const lastActive = utilities.getISOTimestamp();
 
     if (members.length < 2) {
         throw new Error('Atleast 2 members are required to create/join a room');
@@ -28,6 +29,10 @@ room.fetchExistingOrcreate = async (req, res) => {
         if (Array.isArray(room)) {
             room = room[0];
         }
+
+        room.lastActive = lastActive;
+        await Room.findByIdAndUpdate(room._id, {$set: {lastActive}});
+
     } else {
         const roomId = await incrementFieldCount('roomId');
         let payload = {
