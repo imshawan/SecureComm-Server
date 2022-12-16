@@ -226,32 +226,24 @@ userAuth.resetPassword = (req) => {
   });
 }
 
-userAuth.changePassword = (req) => {
+userAuth.changePassword = async (req) => {
   const { oldPassword, newPassword } = req.body;
 
-  return new Promise((resolve, reject) => {
-    User.findById(req.user._id, (err, user) => {
-      if (err) {
-        reject(err);
-      } else {
-        if (!user) {
-          reject('User not found');
-        } else {
-          user.changePassword(oldPassword, newPassword, function(err) {
-             if(err) {
-              if(err.name === 'IncorrectPasswordError'){
-                reject('Incorrect password');
-              } else {
-                reject('Something went wrong!! Please try again after sometime');
-              }
-            } else {
-              resolve({message: 'Your password has been changed successfully' });
-             }
-           });
-        }
-      }
-    });
-  });
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    throw new Error('User not found!');
+  }
+
+  try {
+    await user.changePassword(oldPassword, newPassword);
+  } catch (err) {
+    if (err.name === 'IncorrectPasswordError') {
+      throw new Error('Incorrect current password!');
+    }
+  }
+
+  return {message: 'Your password was changed successfully'};
+
 }
 
 userAuth.changeEmail = async (req) => {
