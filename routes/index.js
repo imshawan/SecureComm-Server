@@ -9,6 +9,7 @@ router.use('/api/v1/users', cors.cors, require('./user'));
 router.use('/api/v1/auth', cors.cors, require('./auth'));
 router.use('/api/v1/rooms', cors.cors, require('./rooms'));
 router.use('/api/v1/query', cors.cors, require('./queries'));
+router.use('/api/v1/tokens', cors.cors, require('./tokens'));
 
 // Check API status
 router.use('/api/status', (req, res) => {

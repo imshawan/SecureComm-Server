@@ -1,6 +1,7 @@
-const controllers = module.exports;
+const API = module.exports;
 
-controllers.users = require('./users');
-controllers.auth = require('./auth');
-controllers.rooms = require('./room');
-controllers.sheets = require('./sheets');
+API.users = require('./users');
+API.auth = require('./auth');
+API.rooms = require('./room');
+API.sheets = require('./sheets');
+API.tokens = require('./tokens');
