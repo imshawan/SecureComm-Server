@@ -7,6 +7,7 @@ const userUtils = require('./user');
 const {timeStamp} = require('../utils/utilities');
 const firebaseAdmin = require('firebase-admin');
 const serviceAccount = require('../securecomm-serviceAccountKey.json');
+const messaging = require('../messaging');
 
 const Sockets = module.exports;
 
@@ -119,8 +120,10 @@ function onConnection (socket) {
     socket.on('global:message:send', async (sock) => {
         const {currentRoom, message, chatUser} = sock;
         const {memberDetails, roomId} = currentRoom;
+        const {user} = socket;
 
         const recipientFCMTokenData = await Token.findOne({user: memberDetails._id});
+        var messagePayload = {...message, roomId};
 
         if (recipientFCMTokenData && recipientFCMTokenData.token) {
             let {token} = recipientFCMTokenData;
@@ -134,8 +137,6 @@ function onConnection (socket) {
             };
 
             try {
-                // console.log('RoomId: ',roomId);
-                // console.log('typeof: ',typeof roomId);
                 await messagingService.send({ data: payload, token });
             } catch (err) {
                 console.error(err);
@@ -143,6 +144,14 @@ function onConnection (socket) {
         }
 
         socket.to(sock.room).emit('global:message:receive', sock);
+
+        if (messagePayload.hasOwnProperty('_id')) {
+            delete messagePayload._id;
+        }
+
+        messagePayload.user = user._id;
+
+        await messaging.createMessage(messagePayload);
     });
 
 }

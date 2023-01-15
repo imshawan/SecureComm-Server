@@ -8,7 +8,9 @@ utils.generators = require('./generators');
 utils.emailer = require('./emailer');
 
 utils.incrementFieldCount = async function (field) {
-    const Obj = await Global.findOneAndUpdate({type: 'globals'}, {$inc: {[field]: 1}}, {upsert: true, new: true});
+    const Obj = await Global.findOneAndUpdate(
+        {type: 'globals'}, {$inc: {[field]: 1}}, {upsert: true, useFindAndModify: false, new: true});
+        
     let { _doc={} } = Obj || {};
 
     return _doc[field];
