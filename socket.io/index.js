@@ -134,7 +134,8 @@ function onConnection (socket) {
             };
 
             try {
-                // console.log('Token: ',token);
+                console.log('RoomId: ',roomId);
+                console.log('typeof: ',typeof roomId);
                 await messagingService.send({ data: payload, token });
             } catch (err) {
                 console.error(err);
