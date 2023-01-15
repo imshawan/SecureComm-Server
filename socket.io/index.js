@@ -133,6 +133,7 @@ function onConnection (socket) {
             };
 
             try {
+                console.log('Token: ',token);
                 await messagingService.send({ data: payload, token });
             } catch (err) {
                 console.error(err);
