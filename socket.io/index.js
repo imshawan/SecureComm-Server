@@ -130,12 +130,12 @@ function onConnection (socket) {
                 user: JSON.stringify({
                     firstname, lastname, picture, _id
                 }),
-                roomId,
+                roomId: String(roomId),
             };
 
             try {
-                console.log('RoomId: ',roomId);
-                console.log('typeof: ',typeof roomId);
+                // console.log('RoomId: ',roomId);
+                // console.log('typeof: ',typeof roomId);
                 await messagingService.send({ data: payload, token });
             } catch (err) {
                 console.error(err);
