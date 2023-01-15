@@ -2,14 +2,22 @@ const { Server } = require('socket.io');
 const passport = require('passport');
 const {ExtractJwt} = require('passport-jwt');
 const chalk = require('chalk');
-const {Session} = require('../models');
+const {Session, Token} = require('../models');
 const userUtils = require('./user');
 const {timeStamp} = require('../utils/utilities');
+const firebaseAdmin = require('firebase-admin');
+const serviceAccount = require('../securecomm-serviceAccountKey.json');
 
 const Sockets = module.exports;
 
 const inactivityTime = (1000 * 60) * 2; // 2 minutes
 var connectedUsers = [];
+
+const firebaseApp = firebaseAdmin.initializeApp({
+    credential: firebaseAdmin.credential.cert(serviceAccount)
+});
+
+const messagingService = firebaseAdmin.messaging(firebaseApp);
 
 Sockets.init = function (server) {
 
@@ -103,12 +111,34 @@ function onConnection (socket) {
     });
 
     socket.on('message:send', sock => {
-        console.log(sock);
+        // console.log(sock);
         // console.log(Sockets.io.sockets.adapter.rooms.get(6))
         socket.to(sock.room).emit('message:receive', sock);
     });
 
-    socket.on('global:message:send', sock => {
+    socket.on('global:message:send', async (sock) => {
+        const {currentRoom, message, chatUser} = sock;
+        const {memberDetails} = currentRoom;
+
+        const recipientFCMTokenData = await Token.findOne({user: memberDetails._id});
+
+        if (recipientFCMTokenData && recipientFCMTokenData.token) {
+            let {token} = recipientFCMTokenData;
+            let {firstname, lastname, picture, _id} = chatUser;
+            let payload = {
+                message: message.message,
+                user: JSON.stringify({
+                    firstname, lastname, picture, _id
+                }),
+            };
+
+            try {
+                await messagingService.send({ data: payload, token });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
         socket.to(sock.room).emit('global:message:receive', sock);
     });
 
