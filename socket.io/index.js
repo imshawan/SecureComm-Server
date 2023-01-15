@@ -118,7 +118,7 @@ function onConnection (socket) {
 
     socket.on('global:message:send', async (sock) => {
         const {currentRoom, message, chatUser} = sock;
-        const {memberDetails} = currentRoom;
+        const {memberDetails, roomId} = currentRoom;
 
         const recipientFCMTokenData = await Token.findOne({user: memberDetails._id});
 
@@ -130,10 +130,11 @@ function onConnection (socket) {
                 user: JSON.stringify({
                     firstname, lastname, picture, _id
                 }),
+                roomId,
             };
 
             try {
-                console.log('Token: ',token);
+                // console.log('Token: ',token);
                 await messagingService.send({ data: payload, token });
             } catch (err) {
                 console.error(err);
