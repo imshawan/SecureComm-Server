@@ -134,7 +134,3 @@ async function hasPermissionToAccess (messageId, user) {
         throw new Error('You are unauthorized to access');
     }
 }
-
-messaging.updateStatus({
-    user: '631ac5bfc8245bc7c98456a5', messageId: 188, status: 'sents'
-})
