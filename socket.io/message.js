@@ -37,7 +37,7 @@ message.onGlobalMessageSent = async (socket, data) => {
         };
 
         try {
-            await messagingService.sendToDevice([token], {data}, options);
+            await messagingService.sendToDevice(token, {data}, options);
 
         } catch (err) {
             console.error(err);
