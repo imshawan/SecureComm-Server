@@ -19,9 +19,9 @@ message.onGlobalMessageSent = async (socket, data) => {
     var messagePayload = {...message, roomId};
 
     if (recipientFCMTokenData && recipientFCMTokenData.token) {
-        let {token} = recipientFCMTokenData;
-        let {firstname, lastname, picture, _id} = chatUser;
-        let payload = {
+        const {token} = recipientFCMTokenData;
+        const {firstname, lastname, picture, _id} = chatUser;
+        const data = {
             message: message.message,
             user: JSON.stringify({
                 firstname, lastname, picture, _id
@@ -29,8 +29,16 @@ message.onGlobalMessageSent = async (socket, data) => {
             roomId: String(roomId),
         };
 
+        const options = {
+            // Required for background/quit data-only messages on iOS
+            contentAvailable: true,
+            // Required for background/quit data-only messages on Android
+            priority: 'high',
+        };
+
         try {
-            await messagingService.send({ data: payload, token });
+            await messagingService.sendToDevice([token], {data}, options);
+
         } catch (err) {
             console.error(err);
         }
