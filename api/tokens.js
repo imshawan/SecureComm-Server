@@ -4,13 +4,14 @@ const room = module.exports;
 
 room.saveUserFCMToken = async (req) => {
     const { user } = req;
-    const { token, deviceId } = req.body;
+    const { token, deviceId, deviceType } = req.body;
 
     const payload = {
         $set: {
             user: user._id,
             token, 
-            deviceId, 
+            deviceId,
+            deviceType, 
             type: 'fcm'
         }
     };

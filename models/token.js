@@ -14,6 +14,10 @@ const tokenSchema = new Schema({
         type: String,
         required: true
     },
+    deviceType: {
+        type: String,
+        default: ''
+    },
     type: {
         type: String,
         required: true

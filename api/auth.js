@@ -150,7 +150,7 @@ userAuth.sendOTP =  async (req) => {
   }
 
   userAuth.signIn = async (req) => {
-    const {deviceId} = req.body;
+    const {deviceId, deviceType} = req.body;
     const token = authentication.getToken({_id: req.user._id}, req.body.remember_me);
     if (token) {
       const payload = {
@@ -176,6 +176,7 @@ userAuth.sendOTP =  async (req) => {
       sessionPayload.token = token;
       sessionPayload.user = payload.user._id;
       sessionPayload.deviceId = deviceId;
+      sessionPayload.deviceType = deviceType;
 
       await Session.findOneAndUpdate({user: sessionPayload.user}, sessionPayload, {upsert: true, useFindAndModify: false});
 

@@ -29,15 +29,13 @@ message.onGlobalMessageSent = async (socket, data) => {
             roomId: String(roomId),
         };
 
-        const options = {
-            // Required for background/quit data-only messages on iOS
-            contentAvailable: true,
+        const android = {
             // Required for background/quit data-only messages on Android
             priority: 'high',
         };
 
         try {
-            await messagingService.sendToDevice(token, {data}, options);
+            await messagingService.send({ data, token, android });
 
         } catch (err) {
             console.error(err);

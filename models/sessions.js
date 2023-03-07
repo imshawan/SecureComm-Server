@@ -14,6 +14,10 @@ const sessionSchema = new Schema({
         type: String,
         required: true
     },
+    deviceType: {
+        type: String,
+        default: ''
+    },
     expiresAt: {
         type: String,
         default: ''
