@@ -38,7 +38,7 @@ users.getUsersByUsername = async (req) => {
 
     let queryObj = {
         $regex: new RegExp(queryString),
-        $options: '$i'
+        $options: 'i'
     };
 
     const keys = {
