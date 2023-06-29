@@ -23,6 +23,7 @@ userAuth.sendOTP = async (req, res) => {
   try {
     utilities.handleApiResponse(200, res, await api.auth.sendOTP(req));
   } catch (err) {
+    console.log(err);
     utilities.handleApiResponse(400, res, new Error(err.message));
   }
 }
